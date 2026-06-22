@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Veritas AI</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="auth-page">
+    <div class="auth-container">
+      <!-- Left Panel: Branding -->
+      <div class="auth-branding animate-fade-in">
+        <a href="index.html" class="brand-logo">
+          <div class="icon">🛡️</div>
+          <span>Veritas AI</span>
+        </a>
+        <h2>Welcome Back to Veritas AI</h2>
+        <p>Log in to access your personal dashboard, track news analysis history, save reports, and download credibility stats.</p>
+        
+        <ul class="auth-features">
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Unlimited Text & URL Analyses</span>
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Explainable AI Reasonings Lists</span>
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Export Reports to CSV, PDF & Excel</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Panel: Form -->
+      <div class="auth-form-panel animate-scale-in">
+        <h1>Account Login</h1>
+        <p class="subtitle">Securely log in to your verification panel</p>
+
+        <form class="auth-form" id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-email">
+              <span>✉</span> Email Address
+            </label>
+            <input type="email" id="login-email" class="form-input" placeholder="e.g. name@domain.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">
+              <span>🔒</span> Password
+            </label>
+            <div class="password-wrapper">
+              <input type="password" id="login-password" class="form-input" placeholder="••••••••" required style="padding-right: var(--space-10);">
+              <button type="button" class="password-toggle" id="login-password-toggle" onclick="togglePasswordVisibility('login-password', 'login-password-toggle')">🔒</button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="form-checkbox">
+              <input type="checkbox"> Remember Me
+            </label>
+            <a href="#" onclick="alert('Forgot password code code simulation: verification OTP sent to your registered email.')">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Sign In 🚀</button>
+        </form>
+
+        <div class="auth-divider">
+          <span>or</span>
+        </div>
+
+        <button class="social-btn" onclick="googleLoginMock()">
+          <span style="font-size: 1.1rem;">🌐</span> Continue with Google
+        </button>
+
+        <p class="auth-link">
+          Don't have an account? <a href="signup.html">Create account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

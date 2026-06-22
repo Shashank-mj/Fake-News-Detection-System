@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up – Veritas AI</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="auth-page">
+    <div class="auth-container" style="max-width: 1100px;">
+      <!-- Left Panel: Branding -->
+      <div class="auth-branding animate-fade-in">
+        <a href="index.html" class="brand-logo">
+          <div class="icon">🛡️</div>
+          <span>Veritas AI</span>
+        </a>
+        <h2>Create Your Free Account</h2>
+        <p>Get instant access to advanced news analysis dashboards, entities classification trackers, and credibility metrics.</p>
+        
+        <ul class="auth-features">
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Interactive Sentiment Gauges</span>
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Named Entities Recognition Tagging</span>
+          </li>
+          <li>
+            <div class="check-icon">✓</div>
+            <span>Personal Dashboard with History Tracking</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Panel: Form -->
+      <div class="auth-form-panel animate-scale-in" style="padding: var(--space-8) var(--space-10);">
+        <h1>Get Started</h1>
+        <p class="subtitle">Join Veritas AI for advanced NLP news verification</p>
+
+        <form class="auth-form" id="signup-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="signup-fullname">
+                <span>👤</span> Full Name
+              </label>
+              <input type="text" id="signup-fullname" class="form-input" placeholder="e.g. John Doe" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="signup-username">
+                <span>🏷️</span> Username
+              </label>
+              <input type="text" id="signup-username" class="form-input" placeholder="e.g. johndoe" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="signup-email">
+                <span>✉</span> Email Address
+              </label>
+              <input type="email" id="signup-email" class="form-input" placeholder="e.g. name@domain.com" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="signup-mobile">
+                <span>📱</span> Mobile Number
+              </label>
+              <input type="tel" id="signup-mobile" class="form-input" placeholder="e.g. +1 (555) 000-0000" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signup-password">
+              <span>🔒</span> Password
+            </label>
+            <div class="password-wrapper">
+              <input type="password" id="signup-password" class="form-input" placeholder="Min. 6 characters" required style="padding-right: var(--space-10);">
+              <button type="button" class="password-toggle" id="signup-password-toggle" onclick="togglePasswordVisibility('signup-password', 'signup-password-toggle')">🔒</button>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+            </div>
+            <div id="strength-text" class="strength-text">Enter password</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signup-confirm">
+              <span>🔒</span> Confirm Password
+            </label>
+            <input type="password" id="signup-confirm" class="form-input" placeholder="Re-enter password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Create Account 🚀</button>
+        </form>
+
+        <div class="auth-divider">
+          <span>or</span>
+        </div>
+
+        <button class="social-btn" onclick="googleLoginMock()">
+          <span style="font-size: 1.1rem;">🌐</span> Sign Up with Google
+        </button>
+
+        <p class="auth-link">
+          Already have an account? <a href="login.html">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

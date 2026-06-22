@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analyze News – Veritas AI</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/analyze.css">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon">🛡️</div>
+      <span>Veritas AI</span>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="analyze.html" class="active">Analyze</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions" id="nav-actions">
+      <!-- Injected by app.js -->
+    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+  </nav>
+
+  <!-- Workspace Container -->
+  <main class="page-wrapper analyz    <div class="container" style="max-width: 1200px;">
+      <div class="analyze-header animate-fade-in-down">
+        <h1>Advanced Credibility Analyzer</h1>
+        <p>Paste a complete news article, input its URL, or type its title. Our model decomposes structural signals, sentiment weight, entity references, and clickbait risk vectors in real-time.</p>
+      </div>
+
+      <!-- Workspace Grid Wrapper -->
+      <div class="workspace-wrapper" style="display: flex; gap: var(--space-8); align-items: flex-start; justify-content: center; width: 100%; transition: all 0.3s ease;">
+        
+        <!-- Workspace Main Panel -->
+        <div class="workspace-main" style="flex: 1; min-width: 0; max-width: 800px; width: 100%;">
+          <!-- Tab Switcher -->
+          <div class="analyze-tabs animate-fade-in">
+            <div class="tabs">
+              <button class="tab active" data-tab="text">Paste Article Text</button>
+              <button class="tab" data-tab="url">Paste News URL</button>
+              <button class="tab" data-tab="title">Analyze by Title</button>
+            </div>
+          </div>
+
+          <!-- Main Input Workspace Card -->
+          <div class="analyze-card animate-scale-in" id="analysis-input-panel">
+            
+            <!-- Text Paste Panel -->
+            <div class="tab-content active" id="text-tab">
+              <div class="form-group mb-4">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                  <label class="form-label" for="analyze-text-input" style="margin-bottom: 0;">
+                    <span>✍</span> Pasted Article Text
+                  </label>
+                  <button type="button" class="btn btn-secondary btn-sm" id="mic-btn" onclick="toggleSpeechRecognition()" style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1-5) var(--space-3); font-size: 0.8rem; border-radius: var(--radius-lg); background: rgba(255,255,255,0.05); border: 1px solid var(--border-primary); cursor: pointer;">
+                    <span id="mic-icon">🎙️</span> <span id="mic-text">Voice Input</span>
+                  </button>
+                </div>
+                <textarea id="analyze-text-input" class="analyze-textarea" placeholder="Paste article body here or click 'Voice Input' to speak (minimum 50 characters required for model accuracy)..."></textarea>
+                <div class="char-counter">
+                  <span id="char-count" class="count">0 characters</span>
+                  <span class="text-xs text-tertiary">Max. Limit: 10,000 characters</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- URL Paste Panel -->
+            <div class="tab-content" id="url-tab">
+              <div class="form-group mb-6">
+                <label class="form-label" for="analyze-url-input">
+                  <span>🔗</span> News Website URL
+                </label>
+                <div class="url-input-wrapper">
+                  <input type="url" id="analyze-url-input" class="form-input" placeholder="e.g. https://domain.com/news/article-headline">
+                </div>
+                <p class="text-xs text-tertiary mt-2">Our parser automatically fetches headers, extracts main text bodies, and runs metadata source validations.</p>
+              </div>
+            </div>
+
+            <!-- Title Paste Panel -->
+            <div class="tab-content" id="title-tab">
+              <div class="form-group mb-6">
+                <label class="form-label" for="analyze-title-input">
+                  <span>✍</span> Article Title / Headline
+                </label>
+                <div class="url-input-wrapper">
+                  <input type="text" id="analyze-title-input" class="form-input" placeholder="Enter article headline here (e.g., NASA Discovers New Habitable Exoplanet or Government to Ban Vegetables)...">
+                </div>
+                <p class="text-xs text-tertiary mt-2">Type a title. Our real-time NLP pre-evaluator will automatically display an instant side note analysis on the right.</p>
+              </div>
+            </div>
+
+            <!-- Analysis Modifiers Row -->
+            <div class="flex justify-between items-center gap-4 flex-wrap" style="border-top: 1px solid var(--border-primary); padding-top: var(--space-5);">
+              <!-- Target Language Selection -->
+              <div class="language-selector">
+                <label for="language-select">Output Language:</label>
+                <select id="language-select">
+                  <option value="en">English (Default)</option>
+                  <option value="ta">Tamil (தமிழ்)</option>
+                  <option value="hi">Hindi (हिन्दी)</option>
+                  <option value="te">Telugu (తెలుగు)</option>
+                  <option value="ml">Malayalam (മലയാളം)</option>
+                </select>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="analyze-actions" style="margin-top: 0;">
+                <button class="btn btn-primary" onclick="startAnalysis(document.querySelector('.analyze-tabs .tab.active').getAttribute('data-tab'))">
+                  Analyze News <span class="btn-icon-anim">➔</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading State Panel -->
+          <div class="card-glass analyze-loading" id="analysis-loading-panel">
+            <div class="loading-brain">
+              <span class="brain-icon">🧠</span>
+              <div class="orbit"></div>
+            </div>
+            <h2 class="text-xl mb-2">Analyzing Article Credibility</h2>
+            <p class="text-secondary text-sm mb-6" style="max-width: 450px;">Please stand by while our NLP pipeline executes metrics classification runs.</p>
+            
+            <div class="loading-steps">
+              <div class="loading-step">
+                <div class="step-icon">⚙</div>
+                <span>Standardizing tokenized text structures</span>
+              </div>
+              <div class="loading-step">
+                <div class="step-icon">⚙</div>
+                <span>Evaluating clickbait weights & text sentiments</span>
+              </div>
+              <div class="loading-step">
+                <div class="step-icon">⚙</div>
+                <span>Classifying Named Entity locations & targets</span>
+              </div>
+              <div class="loading-step">
+                <div class="step-icon">⚙</div>
+                <span>Generating prediction reports</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Side Note Panel -->
+        <div class="workspace-sidebar" id="side-note-panel" style="width: 350px; flex-shrink: 0; display: none; transition: all 0.3s ease;">
+          <div class="card-glass" style="padding: var(--space-6); border: 1px solid var(--border-primary); border-radius: var(--radius-2xl); position: sticky; top: 100px; background: var(--gradient-card); backdrop-filter: blur(20px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--primary-400); display: flex; align-items: center; gap: 6px;">📝 Live Side Note</h3>
+              <span class="badge badge-neutral" id="side-note-status" style="font-size: 0.75rem;">Waiting</span>
+            </div>
+            <div id="side-note-body">
+              <p class="text-secondary text-sm" style="line-height: 1.6;">Start typing a news title on the left. Veritas AI will analyze it in real-time and display a preview of its credibility markers here.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>ng prediction reports</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Templates / Examples -->
+      <div class="quick-examples animate-fade-in delay-2">
+        <h3>Quick Testing Templates</h3>
+        <div class="examples-grid">
+          <div class="example-card real" onclick="pasteExample('real')">
+            <div class="example-icon">✅</div>
+            <div>
+              <div class="example-label">NASA Exoplanet (Real)</div>
+              <div class="example-text">NASA exoplanet discoveries using James Webb telescope data published in Science Journals.</div>
+            </div>
+          </div>
+          <div class="example-card fake" onclick="pasteExample('fake')">
+            <div class="example-icon">❌</div>
+            <div>
+              <div class="example-label">Secret Food Bans (Hoax)</div>
+              <div class="example-text">Sensational rumors claiming secret bills banning vegetables in favor of lab-grown food.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/analyze.js"></script>
+  <script src="js/chatbot.js"></script>
+</body>
+</html>
