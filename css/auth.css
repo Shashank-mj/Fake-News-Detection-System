@@ -87,12 +87,14 @@
 .auth-branding .brand-logo .icon {
   width: 48px;
   height: 48px;
-  background: var(--gradient-accent);
+  background: url('logo.png') no-repeat center center;
+  background-size: cover;
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
+  color: transparent;
   box-shadow: var(--shadow-glow);
 }
 

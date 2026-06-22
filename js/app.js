@@ -2,9 +2,44 @@
    CORE APPLICATION JS & STATE SIMULATION
    ============================================ */
 
+// Safe storage wrapper to prevent crashes when localStorage/sessionStorage are disabled or under file:// security blocks
+const safeStorage = {
+  memoryStore: {},
+
+  getItem(key, useSession = false) {
+    try {
+      const storage = useSession ? sessionStorage : localStorage;
+      return storage.getItem(key);
+    } catch (e) {
+      console.warn("Storage access failed, using memory fallback:", e);
+      return this.memoryStore[key] || null;
+    }
+  },
+
+  setItem(key, value, useSession = false) {
+    try {
+      const storage = useSession ? sessionStorage : localStorage;
+      storage.setItem(key, value);
+    } catch (e) {
+      console.warn("Storage access failed, using memory fallback:", e);
+      this.memoryStore[key] = value;
+    }
+  },
+
+  removeItem(key, useSession = false) {
+    try {
+      const storage = useSession ? sessionStorage : localStorage;
+      storage.removeItem(key);
+    } catch (e) {
+      console.warn("Storage access failed, using memory fallback:", e);
+      delete this.memoryStore[key];
+    }
+  }
+};
+
 // Initialize global state in localStorage if not exists
 function initMockDatabase() {
-  if (!localStorage.getItem('fake_news_users')) {
+  if (!safeStorage.getItem('fake_news_users')) {
     const defaultUsers = [
       {
         fullName: 'Demo User',
@@ -29,10 +64,10 @@ function initMockDatabase() {
         accuracy: 100.0
       }
     ];
-    localStorage.setItem('fake_news_users', JSON.stringify(defaultUsers));
+    safeStorage.setItem('fake_news_users', JSON.stringify(defaultUsers));
   }
 
-  if (!localStorage.getItem('fake_news_history')) {
+  if (!safeStorage.getItem('fake_news_history')) {
     const defaultHistory = [
       {
         id: '1',
@@ -75,15 +110,15 @@ function initMockDatabase() {
         keywords: ['government', 'ban', 'vegetables', 'breaking']
       }
     ];
-    localStorage.setItem('fake_news_history', JSON.stringify(defaultHistory));
+    safeStorage.setItem('fake_news_history', JSON.stringify(defaultHistory));
   }
 
-  if (!localStorage.getItem('fake_news_saved')) {
-    localStorage.setItem('fake_news_saved', JSON.stringify([]));
+  if (!safeStorage.getItem('fake_news_saved')) {
+    safeStorage.setItem('fake_news_saved', JSON.stringify([]));
   }
 
-  if (!localStorage.getItem('fake_news_notifications')) {
-    localStorage.setItem('fake_news_notifications', JSON.stringify([
+  if (!safeStorage.getItem('fake_news_notifications')) {
+    safeStorage.setItem('fake_news_notifications', JSON.stringify([
       { id: '1', message: 'Welcome to the Fake News Detection System!', time: '1 day ago', read: false }
     ]));
   }
@@ -91,28 +126,41 @@ function initMockDatabase() {
 
 // Global App State Object
 const AppState = {
-  getUsers: () => JSON.parse(localStorage.getItem('fake_news_users')),
-  setUsers: (users) => localStorage.setItem('fake_news_users', JSON.stringify(users)),
-  
-  getHistory: () => JSON.parse(localStorage.getItem('fake_news_history')),
-  setHistory: (history) => localStorage.setItem('fake_news_history', JSON.stringify(history)),
-  
-  getSaved: () => JSON.parse(localStorage.getItem('fake_news_saved')),
-  setSaved: (saved) => localStorage.setItem('fake_news_saved', JSON.stringify(saved)),
-  
-  getNotifications: () => JSON.parse(localStorage.getItem('fake_news_notifications')),
-  setNotifications: (notes) => localStorage.setItem('fake_news_notifications', JSON.stringify(notes)),
+  getUsers: () => JSON.parse(safeStorage.getItem('fake_news_users')),
+  setUsers: (users) => safeStorage.setItem('fake_news_users', JSON.stringify(users)),
 
-  getCurrentUser: () => JSON.parse(sessionStorage.getItem('current_user')),
-  setCurrentUser: (user) => sessionStorage.setItem('current_user', JSON.stringify(user)),
+  getHistory: () => JSON.parse(safeStorage.getItem('fake_news_history')),
+  setHistory: (history) => safeStorage.setItem('fake_news_history', JSON.stringify(history)),
+
+  getSaved: () => JSON.parse(safeStorage.getItem('fake_news_saved')),
+  setSaved: (saved) => safeStorage.setItem('fake_news_saved', JSON.stringify(saved)),
+
+  getNotifications: () => JSON.parse(safeStorage.getItem('fake_news_notifications')),
+  setNotifications: (notes) => safeStorage.setItem('fake_news_notifications', JSON.stringify(notes)),
+
+  // Store current_user in localStorage to persist across pages on file:// protocol
+  getCurrentUser: () => JSON.parse(safeStorage.getItem('current_user')),
+  setCurrentUser: (user) => safeStorage.setItem('current_user', JSON.stringify(user)),
   logout: () => {
-    sessionStorage.removeItem('current_user');
-    window.location.href = 'index.html';
+    safeStorage.removeItem('current_user');
+    window.location.href = 'login.html';
   }
 };
 
 // Initialize Database immediately
 initMockDatabase();
+
+// Auth Guard: redirect to login if not logged in (except on login.html and signup.html)
+function checkAuthGuard() {
+  const currentUser = AppState.getCurrentUser();
+  const path = window.location.pathname;
+  const currentPage = path.split('/').pop() || 'index.html';
+  
+  if (!currentUser && currentPage !== 'login.html' && currentPage !== 'signup.html') {
+    window.location.href = 'login.html';
+  }
+}
+checkAuthGuard();
 
 // Toast Notifications System
 const Toast = {
@@ -163,9 +211,9 @@ const Toast = {
 
 // Theme Toggler Utility
 function initTheme() {
-  const currentTheme = localStorage.getItem('theme') || 'dark';
+  const currentTheme = safeStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
-  
+
   const themeToggleBtn = document.getElementById('theme-toggle');
   if (themeToggleBtn) {
     themeToggleBtn.innerHTML = currentTheme === 'light' ? '🌙' : '☀️';
@@ -173,7 +221,7 @@ function initTheme() {
       const activeTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = activeTheme === 'light' ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
+      safeStorage.setItem('theme', newTheme);
       themeToggleBtn.innerHTML = newTheme === 'light' ? '🌙' : '☀️';
     });
   }
@@ -182,7 +230,7 @@ function initTheme() {
 // Setup Global Event Listeners & Navbar States
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  
+
   // Navbar Scrolled background modification
   const navbar = document.querySelector('.navbar');
   if (navbar) {
@@ -220,7 +268,7 @@ function renderNavbarAuth() {
     navActions.innerHTML = `
       <div class="dropdown" id="user-dropdown">
         <div class="nav-user" onclick="toggleUserDropdown(event)">
-          <div class="avatar">${currentUser.fullName.split(' ').map(n=>n[0]).join('')}</div>
+          <div class="avatar">${currentUser.fullName.split(' ').map(n => n[0]).join('')}</div>
           <span class="user-name">${currentUser.fullName}</span>
         </div>
         <div class="dropdown-menu">
@@ -241,9 +289,9 @@ function renderNavbarAuth() {
       <button class="theme-toggle" id="theme-toggle">☀️</button>
     `;
   }
-  
+
   // Re-run theme icon setup for the new DOM button
-  const currentTheme = localStorage.getItem('theme') || 'dark';
+  const currentTheme = safeStorage.getItem('theme') || 'dark';
   const themeToggleBtn = document.getElementById('theme-toggle');
   if (themeToggleBtn) {
     themeToggleBtn.innerHTML = currentTheme === 'light' ? '🌙' : '☀️';
@@ -251,7 +299,7 @@ function renderNavbarAuth() {
       const activeTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = activeTheme === 'light' ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
+      safeStorage.setItem('theme', newTheme);
       themeToggleBtn.innerHTML = newTheme === 'light' ? '🌙' : '☀️';
     });
   }
@@ -396,32 +444,32 @@ const homeTranslations = {
   }
 };
 
-window.translateHomePage = function(lang) {
+window.translateHomePage = function (lang) {
   const tr = homeTranslations[lang] || homeTranslations['en'];
-  
+
   // Update elements
   updateHomeText('home-hero-badge', tr.heroBadge);
-  
+
   const heroTitle = document.getElementById('home-hero-title');
   if (heroTitle) heroTitle.innerHTML = tr.heroTitle;
-  
+
   updateHomeText('home-hero-desc', tr.heroDesc);
   updateHomeText('home-btn-analyze', tr.btnAnalyze);
   updateHomeText('home-btn-dashboard', tr.btnDashboard);
-  
+
   updateHomeText('home-stat-1', tr.stat1);
   updateHomeText('home-stat-2', tr.stat2);
   updateHomeText('home-stat-3', tr.stat3);
   updateHomeText('home-stat-4', tr.stat4);
-  
+
   updateHomeText('home-feat-badge', tr.featBadge);
   updateHomeText('home-feat-title', tr.featTitle);
   updateHomeText('home-feat-subtitle', tr.featSubtitle);
-  
+
   updateHomeText('home-loc-badge', tr.locBadge);
   updateHomeText('home-loc-title', tr.locTitle);
   updateHomeText('home-loc-desc', tr.locDesc);
-  
+
   updateHomeText('home-preview-title', tr.previewTitle);
   updateHomeText('home-preview-desc', tr.previewDesc);
   updateHomeText('home-preview-btn', tr.previewBtn);

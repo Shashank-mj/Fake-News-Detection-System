@@ -16,7 +16,7 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <a href="index.html" class="nav-brand">
-      <div class="brand-icon">🛡️</div>
+      <div class="brand-icon"></div>
       <span>Veritas AI</span>
     </a>
     <ul class="nav-links" id="nav-links">
@@ -27,7 +27,7 @@
     <div class="nav-actions" id="nav-actions">
       <!-- Filled by app.js -->
     </div>
-    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+    <button class="mobile-menu-btn" id="mobile-menu-btn">&#9776;</button>
   </nav>
 
   <!-- User Dashboard Panel -->
@@ -40,28 +40,39 @@
           <h1>Personal Analytics Dashboard</h1>
           <p>Track your news analysis history, verify trending events, and export saved records.</p>
         </div>
-        <a href="analyze.html" class="btn btn-primary">➕ New Analysis Run</a>
+        <a href="analyze.html" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Analysis Run
+        </a>
       </div>
 
       <!-- Stats Cards -->
       <div class="stats-grid animate-fade-in-up">
         <div class="stat-card">
-          <div class="stat-icon bg-success-subtle text-success">📊</div>
+          <div class="stat-icon bg-success-subtle text-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
           <div class="stat-value" id="stat-total-analyses">0</div>
           <div class="stat-label">Total News Analyses</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon bg-danger-subtle text-danger">⚠️</div>
+          <div class="stat-icon bg-danger-subtle text-danger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
           <div class="stat-value" id="stat-fake-detected">0</div>
           <div class="stat-label">Fake News Detected</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon bg-success-subtle text-success">🛡️</div>
+          <div class="stat-icon bg-success-subtle text-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
           <div class="stat-value" id="stat-real-detected">0</div>
           <div class="stat-label">Real News Verified</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon bg-success-subtle text-success">🎯</div>
+          <div class="stat-icon bg-success-subtle text-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
           <div class="stat-value" id="stat-avg-confidence">0%</div>
           <div class="stat-label">Average Confidence</div>
         </div>
@@ -79,7 +90,7 @@
 
         <!-- News Feed Alerts -->
         <div class="card flex flex-col">
-          <h3 class="text-lg font-bold mb-4">Trending Verification alerts</h3>
+          <h3 class="text-lg font-bold mb-4">Trending Verification Alerts</h3>
           <div class="news-feed" id="trending-feed-list">
             <!-- News alerts items injected here -->
           </div>

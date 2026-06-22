@@ -30,7 +30,7 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <a href="index.html" class="nav-brand">
-      <div class="brand-icon">🛡️</div>
+      <div class="brand-icon"></div>
       <span>Veritas AI</span>
     </a>
     <ul class="nav-links" id="nav-links">
@@ -41,7 +41,7 @@
     <div class="nav-actions" id="nav-actions">
       <!-- Filled by app.js -->
     </div>
-    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+    <button class="mobile-menu-btn" id="mobile-menu-btn">&#9776;</button>
   </nav>
 
   <!-- Admin Panel Panel -->
@@ -51,7 +51,7 @@
       <!-- Header -->
       <div class="dashboard-header animate-fade-in-down">
         <div>
-          <h1>System Control & Dataset Management</h1>
+          <h1>System Control &amp; Dataset Management</h1>
           <p>Supervise user accounts, monitor system-wide news classifications, evaluate model metrics, and train pipelines.</p>
         </div>
       </div>
@@ -95,9 +95,11 @@
           
           <input type="file" id="dataset-file-input" class="hidden" accept=".csv, .xlsx">
           <div class="upload-zone" id="dataset-upload-zone">
-            <p class="text-4xl mb-2">📁</p>
+            <div style="display:flex; justify-content:center; margin-bottom: var(--space-2);">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-tertiary)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
             <p class="font-semibold text-primary">Upload Dataset File</p>
-            <p class="text-xs text-secondary">Drag & drop dataset (.csv, .xlsx) or click to browse</p>
+            <p class="text-xs text-secondary">Drag &amp; drop dataset (.csv, .xlsx) or click to browse</p>
           </div>
         </div>
       </div>

@@ -21,7 +21,8 @@ const translations = {
     related: 'Similar News Verification',
     downloadPdf: 'Download PDF Report',
     downloadCsv: 'Export CSV',
-    bookmark: 'Save Analysis Report'
+    bookmark: 'Save Analysis Report',
+    claimsTitle: 'Fact-by-Fact Statement Verification'
   },
   ta: {
     resultTitle: 'கணிப்பு முடிவு டாஷ்போர்டு',
@@ -40,7 +41,8 @@ const translations = {
     related: 'இதே போன்ற செய்தி சரிபார்ப்பு',
     downloadPdf: 'PDF அறிக்கையைப் பதிவிறக்கவும்',
     downloadCsv: 'CSV ஏற்றுமதி',
-    bookmark: 'பகுப்பாய்வு அறிக்கையைச் சேமிக்கவும்'
+    bookmark: 'பகுப்பாய்வு அறிக்கையைச் சேமிக்கவும்',
+    claimsTitle: 'கூற்று வாரியாக சரிபார்ப்பு'
   },
   hi: {
     resultTitle: 'पूर्वानुमान परिणाम डैशबोर्ड',
@@ -59,7 +61,8 @@ const translations = {
     related: 'समान समाचार सत्यापन',
     downloadPdf: 'पीडीएफ रिपोर्ट डाउनलोड करें',
     downloadCsv: 'सीएसवी निर्यात',
-    bookmark: 'विश्लेषण रिपोर्ट सहेजें'
+    bookmark: 'विश्लेषण रिपोर्ट सहेजें',
+    claimsTitle: 'तथ्य-दर-तथ्य कथन सत्यापन'
   },
   te: {
     resultTitle: 'అంచనా ఫలితాల డాష్‌బోర్డ్',
@@ -78,7 +81,8 @@ const translations = {
     related: 'సారూప్య వార్తల ధృవీకరణ',
     downloadPdf: 'PDF నివేదికను డౌన్‌లోడ్ చేయండి',
     downloadCsv: 'CSV ఎగుమతి',
-    bookmark: 'విశ్లేషణ నివేదికను సేవ్ చేయి'
+    bookmark: 'విశ్లేషణ నివేదికను సేవ్ చేయి',
+    claimsTitle: 'అంశాల వారీగా ప్రకటనల ధృవీకరణ'
   },
   ml: {
     resultTitle: 'പ്രവചന ഫല ഡാഷ്‌ബോർഡ്',
@@ -97,7 +101,8 @@ const translations = {
     related: 'സമാന വാർത്താ പരിശോധന',
     downloadPdf: 'PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക',
     downloadCsv: 'CSV കയറ്റുമതി ചെയ്യുക',
-    bookmark: 'വിശകലന റിപ്പോർട്ട് സംരക്ഷിക്കുക'
+    bookmark: 'വിശകലന റിപ്പോർട്ട് സംരക്ഷിക്കുക',
+    claimsTitle: 'വസ്തുതാപരമായ പ്രസ്താവന പരിശോധന'
   },
   kn: {
     resultTitle: 'ಮುನ್ಸೂಚನೆ ಫಲಿತಾಂಶದ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
@@ -116,7 +121,8 @@ const translations = {
     related: 'ಹೋಲುವ ಸುದ್ದಿ ಪರಿಶೀಲನೆ',
     downloadPdf: 'PDF ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ',
     downloadCsv: 'CSV ರಫ್ತು',
-    bookmark: 'ವಿಶ್ಲೇಷಣೆ ವರದಿಯನ್ನು ಉಳಿಸಿ'
+    bookmark: 'ವಿಶ್ಲೇಷಣೆ ವರದಿಯನ್ನು ಉಳಿಸಿ',
+    claimsTitle: 'ವಿಷಯವಾರು ಹೇಳಿಕೆಗಳ ಪರಿಶೀಲನೆ'
   }
 };
 
@@ -160,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderResultData(report) {
   // Update Verdict
   const heroBadge = document.getElementById('verdict-hero-badge');
-  const heroLabel = document.getElementById('verdict-hero-label');
+  const heroLabel = document.getElementById('verdict-hero-sublabel');
   
   if (heroBadge && heroLabel) {
     if (report.verdict === 'REAL') {
@@ -264,6 +270,61 @@ function renderResultData(report) {
   const summaryBox = document.getElementById('summary-text-box');
   if (summaryBox) {
     summaryBox.innerHTML = `<p>${report.summary}</p>`;
+  }
+
+  // Fact-by-Fact Claims and Full Article Reader Populator
+  const articleContentBody = document.getElementById('article-content-body');
+  if (articleContentBody) {
+    articleContentBody.innerText = report.content || report.summary || "No article content available.";
+  }
+
+  const claimsListContainer = document.getElementById('claims-list-container');
+  const countAll = document.getElementById('claim-count-all');
+  const countTrue = document.getElementById('claim-count-true');
+  const countFalse = document.getElementById('claim-count-false');
+
+  if (claimsListContainer) {
+    const statements = report.statements || [
+      { text: report.title, status: report.verdict === 'REAL' ? 'TRUE' : 'FALSE', explanation: report.summary }
+    ];
+
+    let trueCount = 0;
+    let falseCount = 0;
+
+    claimsListContainer.innerHTML = statements.map((st, idx) => {
+      const isTrue = st.status === 'TRUE';
+      const isFalse = st.status === 'FALSE';
+      
+      if (isTrue) trueCount++;
+      if (isFalse) falseCount++;
+
+      let statusBadgeClass = 'neutral';
+      let statusIcon = '⚠️';
+      if (isTrue) {
+        statusBadgeClass = 'true';
+        statusIcon = '✅';
+      } else if (isFalse) {
+        statusBadgeClass = 'false';
+        statusIcon = '❌';
+      }
+
+      return `
+        <div class="claim-item status-${st.status.toLowerCase()}" data-status="${st.status.toLowerCase()}">
+          <div class="claim-header-status">
+            <span class="claim-badge ${statusBadgeClass}">${statusIcon} ${st.status}</span>
+            <span style="font-size: 0.75rem; color: var(--text-tertiary);">Claim #${idx + 1}</span>
+          </div>
+          <p class="claim-text">${st.text}</p>
+          <div class="claim-explanation">
+            <strong>AI Assessment:</strong> ${st.explanation}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (countAll) countAll.innerText = statements.length;
+    if (countTrue) countTrue.innerText = trueCount;
+    if (countFalse) countFalse.innerText = falseCount;
   }
 
   // Similar News Verification
@@ -417,6 +478,7 @@ function applyLanguageTranslation(lang) {
   updateTextById('trans-xai-title', tr.reasons);
   updateTextById('trans-summary-title', tr.summary);
   updateTextById('trans-related-title', tr.related);
+  updateTextById('trans-claims-title', tr.claimsTitle || 'Fact-by-Fact Statement Verification');
   
   // Replace Verdict labels
   const verdictText = document.getElementById('trans-verdict');
@@ -500,4 +562,113 @@ window.saveReportToDashboard = function() {
   AppState.setSaved(saved);
   
   Toast.show('Report Saved', 'Bookmarked report. You can retrieve it in your dashboard profile.', 'success');
+};
+
+// Filter Claims lists on the result screen
+window.filterClaims = function(status) {
+  const tabs = document.querySelectorAll('#claims-filter-tabs .claims-tab');
+  tabs.forEach(tab => {
+    const filter = tab.getAttribute('data-claim-filter');
+    if (filter === status) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  const items = document.querySelectorAll('.claims-list .claim-item');
+  items.forEach(item => {
+    const itemStatus = item.getAttribute('data-status');
+    if (status === 'all') {
+      item.classList.remove('hidden');
+    } else if (status === 'true' && itemStatus === 'true') {
+      item.classList.remove('hidden');
+    } else if (status === 'false' && itemStatus === 'false') {
+      item.classList.remove('hidden');
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+};
+
+// Download Original Clean Article Body (.txt)
+window.downloadArticleTxt = function() {
+  if (!activeReport) return;
+
+  const content = `=========================================
+VERITAS AI - ARTICLE VERIFICATION REPORT
+=========================================
+Article Title: ${activeReport.title}
+Date Analyzed: ${new Date(activeReport.date).toLocaleString()}
+Overall Verdict: ${activeReport.verdict} (${activeReport.confidence}% confidence)
+-----------------------------------------
+
+Original Content Analyzed:
+${activeReport.content || "No original content stored."}
+
+-----------------------------------------
+Verified via Veritas AI Systems.
+`;
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `Article_${activeReport.id}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  Toast.show('Article Downloaded', 'The full article text file was saved.', 'success');
+};
+
+// Download Detailed Claim Analysis Markdown Report (.md)
+window.downloadTruthReportMd = function() {
+  if (!activeReport) return;
+
+  const statements = activeReport.statements || [];
+  
+  let claimsTable = `| Claim ID | Verified Status | Statement text | AI Fact-Checking Assessment |\n| :--- | :--- | :--- | :--- |\n`;
+  statements.forEach((st, idx) => {
+    const statusIcon = st.status === 'TRUE' ? '✅ TRUE' : (st.status === 'FALSE' ? '❌ FALSE' : '⚠️ NEUTRAL');
+    claimsTable += `| #${idx + 1} | ${statusIcon} | ${st.text} | ${st.explanation} |\n`;
+  });
+
+  const markdownContent = `# Veritas AI Claims Verification Report
+
+* **Article Title:** ${activeReport.title}
+* **Analysis Date:** ${new Date(activeReport.date).toLocaleString()}
+* **System Verdict:** **${activeReport.verdict}** (${activeReport.confidence}% confidence)
+* **Publisher Score:** ${activeReport.sourceScore}/100
+* **Clickbait Meter:** ${activeReport.clickbait}%
+
+## Executive Summary
+${activeReport.summary}
+
+## Original Article Text
+\`\`\`text
+${activeReport.content || "No original content stored."}
+\`\`\`
+
+## Fact-by-Fact Statement Verification
+The analysis engine parsed the article into individual claims and mapped their credibility against trusted databases:
+
+${claimsTable}
+
+---
+*Report generated automatically by Veritas NLP Verification Systems.*
+`;
+
+  const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `VeritasReport_${activeReport.id}.md`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  Toast.show('Report Downloaded', 'Claims Verification Markdown file saved.', 'success');
 };

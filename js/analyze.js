@@ -148,7 +148,7 @@ window.startAnalysis = function(type) {
     if (currentStep < steps.length) {
       steps[currentStep].classList.add('active');
       currentStep++;
-      setTimeout(processNextStep, 1000 + Math.random() * 800);
+      setTimeout(processNextStep, 50);
     } else {
       // Completed all mock analysis steps, build results database entity
       const selectedLang = document.getElementById('language-select') ? document.getElementById('language-select').value : 'en';
@@ -157,7 +157,7 @@ window.startAnalysis = function(type) {
   }
 
   // Kickoff step sequence
-  setTimeout(processNextStep, 500);
+  setTimeout(processNextStep, 50);
 };
 
 // Paste quick examples
@@ -177,6 +177,177 @@ window.pasteExample = function(verdict) {
   Toast.show('Template Copied', 'Example text pasted in editor.', 'info');
 };
 
+// Heuristic to dynamically extract Persons, Organizations, and Locations from the text
+function extractEntitiesHeuristics(text) {
+  const lower = text.toLowerCase();
+  const persons = [];
+  const orgs = [];
+  const locations = [];
+
+  // 1. Direct key matches for standard mock data or common inputs
+  if (lower.includes('nasa')) orgs.push('NASA');
+  if (lower.includes('esa')) orgs.push('ESA');
+  if (lower.includes('fda')) orgs.push('FDA');
+  if (lower.includes('james webb')) persons.push('James Webb');
+  if (lower.includes('helen vance')) persons.push('Dr. Helen Vance');
+  if (lower.includes('smith')) persons.push('Minister Smith');
+  if (lower.includes('kepler')) locations.push('Kepler-186f');
+  if (lower.includes('earth')) locations.push('Earth');
+  if (lower.includes('washington')) locations.push('Washington');
+
+  // 2. Scan capitalized words to extract others
+  const words = text.match(/\b[A-Z][a-zA-Z]+\b/g) || [];
+  const stopwords = new Set([
+    'The', 'A', 'An', 'In', 'On', 'At', 'To', 'For', 'With', 'By', 'And', 'But', 'Or', 'As', 'If', 
+    'This', 'That', 'It', 'We', 'They', 'He', 'She', 'You', 'I', 'NASA', 'ESA', 'FDA', 'James', 
+    'Webb', 'Helen', 'Vance', 'Kepler', 'Earth', 'Washington', 'Minister', 'Smith', 'Dr', 'Mr', 'Mrs'
+  ]);
+
+  words.forEach(word => {
+    if (stopwords.has(word) || word.length < 3) return;
+    // Categorize very simply based on word endings or lengths
+    if (word.endsWith('son') || word.endsWith('er') || word.endsWith('en')) {
+      if (!persons.includes(word) && persons.length < 3) persons.push(word);
+    } else if (word.endsWith('corp') || word.endsWith('org') || word.endsWith('inc') || word.endsWith('center')) {
+      if (!orgs.includes(word) && orgs.length < 3) orgs.push(word);
+    } else {
+      if (!locations.includes(word) && locations.length < 3) locations.push(word);
+    }
+  });
+
+  // Fallbacks if lists are empty
+  if (persons.length === 0) persons.push('Independent Journalist');
+  if (orgs.length === 0) orgs.push('News Press Network');
+  if (locations.length === 0) locations.push('Global Reference');
+
+  return { persons, orgs, locations };
+}
+
+// Heuristic to dynamically extract keywords by counting word frequencies (minus common stopwords)
+function extractKeywordsHeuristics(text) {
+  const words = text.toLowerCase()
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
+    .split(/\s+/);
+  
+  const stopwords = new Set([
+    'the', 'a', 'an', 'and', 'but', 'or', 'as', 'if', 'this', 'that', 'it', 'to', 'for', 'in', 'on', 'at', 'with', 
+    'by', 'from', 'of', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'not', 
+    'we', 'they', 'he', 'she', 'you', 'i', 'will', 'would', 'can', 'could', 'should', 'more', 'about', 'other', 
+    'some', 'their', 'them', 'his', 'her', 'its', 'this', 'that', 'these', 'those', 'also', 'very', 'just', 'out'
+  ]);
+  
+  const counts = {};
+  words.forEach(w => {
+    if (w.length < 4 || stopwords.has(w)) return;
+    counts[w] = (counts[w] || 0) + 1;
+  });
+  
+  const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  const result = sorted.slice(0, 5);
+  
+  if (result.length === 0) {
+    return ['analysis', 'credibility', 'veracity', 'facts', 'nlp'];
+  }
+  return result;
+}
+
+// Generate dynamic context-relevant reasons
+function generateDynamicReasons(text, isFake, clickbaitScore) {
+  const reasons = [];
+  const lower = text.toLowerCase();
+  
+  if (isFake) {
+    if (clickbaitScore > 65) {
+      reasons.push('Sensationalist or clickbait phrasing detected in headlines.');
+    }
+    if (lower.includes('!') || lower.includes('breaking') || lower.includes('warning')) {
+      reasons.push('Contains highly emotional exclamation tags or urgent warnings.');
+    }
+    reasons.push('Failed verification checks against trusted database registries.');
+    reasons.push('Unsubstantiated claims without authoritative official references.');
+  } else {
+    reasons.push('Objective, non-emotive language with high statement coherence.');
+    reasons.push('Corroborated by verified entity registries and domain host records.');
+    reasons.push('Proper citations aligning with scientific or primary journalistic logs.');
+  }
+  
+  return reasons.slice(0, 3);
+}
+
+// Generate dynamic, context-appropriate summary based on actual lead sentences
+function generateDynamicSummary(text, isFake) {
+  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 10);
+  if (sentences.length === 0) {
+    return isFake ? "This article contains unsubstantiated assertions." : "This article presents factual observations.";
+  }
+  
+  const leadSentences = sentences.slice(0, 2).join('. ') + '.';
+  if (isFake) {
+    return `Potential credibility issue: "${leadSentences}" The text utilizes sensationalist phrasing, lacks authoritative sources, and displays high emotive bias characteristic of unverified reports.`;
+  } else {
+    return `Factual summary: "${leadSentences}" The text maintains an objective tone and references verifiable events/data consistent with reliable reporting.`;
+  }
+}
+
+// Helper to generate claims truth statement breakdown dynamically
+function generateClaimsBreakdown(content, verdict) {
+  const sentences = content.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 12);
+  if (sentences.length === 0) {
+    sentences.push(content);
+  }
+
+  // To prevent too many items, limit to 4 statements
+  const selectedSentences = sentences.slice(0, 4);
+
+  return selectedSentences.map((sentence, index) => {
+    let status = 'TRUE';
+    let explanation = '';
+    const lower = sentence.toLowerCase();
+
+    if (verdict === 'FAKE') {
+      if (lower.includes('ban') || lower.includes('government') || lower.includes('official') || lower.includes('law') || lower.includes('bill')) {
+        status = 'FALSE';
+        explanation = `The assertion regarding official legislative bans lacks backing. No primary source verifies this regulation.`;
+      } else if (lower.includes('secret') || lower.includes('leak') || lower.includes('hidden') || lower.includes('underground')) {
+        status = 'FALSE';
+        explanation = `Conspiracy keywords detected. The claim of a "secret" leak is unsubstantiated and lacks credible metadata.`;
+      } else if (lower.includes('synthetic') || lower.includes('chemical') || lower.includes('modified') || lower.includes('lab-grown')) {
+        status = 'FALSE';
+        explanation = `Scientific claims regarding artificial/chemical modifications are uncorroborated by agricultural or food safety datasets.`;
+      } else if (lower.includes('shocking') || lower.includes('exclusive') || lower.includes('won\'t believe') || lower.includes('!') || lower.includes('repost')) {
+        status = 'FALSE';
+        explanation = `Sensational call-to-action or clickbait phrasing is used to stimulate emotional response and rapid sharing.`;
+      } else {
+        status = index % 2 === 0 ? 'NEUTRAL' : 'FALSE';
+        explanation = status === 'NEUTRAL' 
+          ? `Introductory or context-setting sentence. Does not contain explicit fake assertions, but lacks primary citation.`
+          : `Unverified claim. No peer-reviewed journals or official regulatory indexes corroborate this statement.`;
+      }
+    } else {
+      // Verdict is REAL
+      if (lower.includes('nasa') || lower.includes('planet') || lower.includes('kepler') || lower.includes('space') || lower.includes('telescope') || lower.includes('orbit')) {
+        status = 'TRUE';
+        explanation = `Corroborated by NASA exoplanet archive registries and astrophysics publication logs.`;
+      } else if (lower.includes('study') || lower.includes('journal') || lower.includes('research') || lower.includes('data') || lower.includes('analyst')) {
+        status = 'TRUE';
+        explanation = `Supported by scientific datasets published in peer-reviewed scientific reviews.`;
+      } else if (lower.includes('business') || lower.includes('economic') || lower.includes('productivity') || lower.includes('remote') || lower.includes('work')) {
+        status = 'TRUE';
+        explanation = `Matches verified global economic reports and workplace index statistics.`;
+      } else {
+        status = 'TRUE';
+        explanation = `Consistent with professional journalistic standards and objective reporting conventions.`;
+      }
+    }
+
+    return {
+      text: sentence + '.',
+      status: status,
+      explanation: explanation
+    };
+  });
+}
+
 // Simulated AI NLP Analysis Model Output Generation
 function generateAnalysisResult(inputSource, type, language) {
   const isFakeNews = inputSource.toLowerCase().includes('breaking exclusive') || 
@@ -189,12 +360,48 @@ function generateAnalysisResult(inputSource, type, language) {
   const currentUserId = AppState.getCurrentUser() ? AppState.getCurrentUser().username : 'guest';
   const analysisId = Date.now().toString();
 
+  // Populate realistic article content for URL and Title inputs
+  let fullBody = inputSource;
+  if (type === 'url') {
+    if (inputSource.toLowerCase().includes('nasa') || inputSource.toLowerCase().includes('planet') || inputSource.toLowerCase().includes('kepler')) {
+      fullBody = `Scientists at NASA have officially discovered a new planet orbiting within the habitable zone of a neighboring star Kepler-186f. Using advanced spectrographic analysis from the James Webb telescope, researchers confirmed the atmospheric content includes oxygen and trace greenhouse gases necessary to support liquid water on the surface. The study was published in the Science Journal peer-reviewed publication this week.`;
+    } else if (inputSource.toLowerCase().includes('vegetables') || inputSource.toLowerCase().includes('ban') || inputSource.toLowerCase().includes('government')) {
+      fullBody = `BREAKING EXCLUSIVE NEWS! You won't believe what happened! A high-ranking government official leaked secret papers showing they are planning to completely ban all fresh vegetables and fruits by next month! They want everyone eating their synthetic lab-grown chemically modified nutrients instead. Repost this immediately to warn your friends before it gets censored from the web!`;
+    } else {
+      if (isFakeNews) {
+        fullBody = `WARNING: Shocking secret papers have been leaked by inside whistleblowers! The global federation is planning to ban all private transportation starting next quarter. They want to force all citizens to use centralized electronic railways to track movement. This extreme directive is being hidden from the mainstream media, so please share this warning with everyone you know!`;
+      } else {
+        fullBody = `A new economic study conducted by the Global Research Center indicates that small businesses have experienced a 12% increase in productivity following the adoption of remote communication tools. Analysts reviewed data from over 5,000 firms and concluded that flexible hours combined with robust digital dashboards led to higher work satisfaction and lower overhead costs. The findings were published in the quarterly Journal of Business and Economics.`;
+      }
+    }
+  } else if (type === 'title') {
+    if (inputSource.toLowerCase().includes('vegetables') || inputSource.toLowerCase().includes('ban') || inputSource.toLowerCase().includes('government')) {
+      fullBody = `BREAKING EXCLUSIVE NEWS! You won't believe what happened! A high-ranking government official leaked secret papers showing they are planning to completely ban all fresh vegetables and fruits by next month! They want everyone eating their synthetic lab-grown chemically modified nutrients instead. Repost this immediately to warn your friends before it gets censored from the web!`;
+    } else if (inputSource.toLowerCase().includes('nasa') || inputSource.toLowerCase().includes('planet') || inputSource.toLowerCase().includes('kepler')) {
+      fullBody = `Scientists at NASA have officially discovered a new planet orbiting within the habitable zone of a neighboring star Kepler-186f. Using advanced spectrographic analysis from the James Webb telescope, researchers confirmed the atmospheric content includes oxygen and trace greenhouse gases necessary to support liquid water on the surface. The study was published in the Science Journal peer-reviewed publication this week.`;
+    } else {
+      if (isFakeNews) {
+        fullBody = `BREAKING: Sensational reports are spreading regarding "${inputSource}". Inside sources claim that authorities have drafted secret documents to enforce this immediately. Witnesses claim that independent scientists warning about the consequences have had their statements deleted from the web. Share this post immediately to expose the truth!`;
+      } else {
+        fullBody = `Recent reports concerning "${inputSource}" have been verified by independent panels. Academic researchers published a comprehensive review analyzing the official documentation. The study confirms that the project adheres to standards and was evaluated under strict control parameters, showing measurable positive impacts for local communities.`;
+      }
+    }
+  }
+
+  // Generate metrics based on actual body content
+  const clickbaitScore = isFakeNews ? Number((80 + Math.random() * 19).toFixed(0)) : Number((5 + Math.random() * 15).toFixed(0));
+  const dynamicSummaryText = generateDynamicSummary(fullBody, isFakeNews);
+  const dynamicEntities = extractEntitiesHeuristics(fullBody);
+  const dynamicReasons = generateDynamicReasons(fullBody, isFakeNews, clickbaitScore);
+  const dynamicKeywords = extractKeywordsHeuristics(fullBody);
+
   // Create highly detailed metrics
   let resultPayload = {
     id: analysisId,
     username: currentUserId,
     date: new Date().toISOString(),
-    content: inputSource,
+    content: fullBody,
+    originalInput: inputSource,
     title: type === 'text' 
       ? (inputSource.split('.').slice(0, 2).join('.') || 'Paste Article Analysis')
       : (type === 'title' ? inputSource : `Extracted news content from: ${inputSource.split('//')[1].split('/')[0]}`),
@@ -205,22 +412,15 @@ function generateAnalysisResult(inputSource, type, language) {
       ? { positive: 8, neutral: 12, negative: 80 } 
       : { positive: 68, neutral: 22, negative: 10 },
     sourceScore: isFakeNews ? Number((10 + Math.random() * 25).toFixed(0)) : Number((85 + Math.random() * 14).toFixed(0)),
-    clickbait: isFakeNews ? Number((80 + Math.random() * 19).toFixed(0)) : Number((5 + Math.random() * 15).toFixed(0)),
-    summary: isFakeNews 
-      ? 'The analyzed text contains unsubstantiated claims regarding government bans, leveraging highly emotional language and call-to-action triggers to spread panic.'
-      : 'The article details planetary atmosphere measurements and telescope readings establishing Kepler exoplanet properties using professional peer-reviewed research structures.',
-    entities: {
-      persons: isFakeNews ? ['Minister Smith'] : ['Dr. Helen Vance', 'James Webb'],
-      orgs: isFakeNews ? ['Secret Agencies'] : ['NASA', 'ESA'],
-      locations: isFakeNews ? ['Worldwide'] : ['Kepler-186f', 'Earth']
-    },
-    reasons: isFakeNews 
-      ? ['Sensational clickbait formatting detected', 'Highly skewed sentiment with negative threat bias', 'Known unreliable or unverified publisher source']
-      : ['Trusted academic publication references match', 'Neutral sentiment and verified entity cross-references', 'High-reputation verified domain name host'],
-    keywords: isFakeNews 
-      ? ['secret', 'ban', 'government', 'exclusive', 'censored']
-      : ['NASA', 'exoplanet', 'habitable', 'James Webb', 'telescope']
+    clickbait: clickbaitScore,
+    summary: dynamicSummaryText,
+    entities: dynamicEntities,
+    reasons: dynamicReasons,
+    keywords: dynamicKeywords
   };
+
+  // Generate statement-by-statement claim verification breakdown
+  resultPayload.statements = generateClaimsBreakdown(resultPayload.content, resultPayload.verdict);
 
   // Push to local storage database
   const history = AppState.getHistory();
